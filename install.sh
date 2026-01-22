@@ -113,23 +113,24 @@ fi
 
 #========[FETCH DOTFILE REPO]========
 echo
-echo -e "${PURPLE_BOLD}fetching dotfile repo${NC}"
+echo -e "${PURPLE}fetching dotfile repo${NC}"
 # if it exists, cd into it and git pull and cd back out!!
 if [ -d "$HOME/dotfiles" ]; then
-	echo -e "${YELLOW_BOLD}${BLUE_BOLD}dotfiles${NC}${YELLOW_BOLD} directory already exists! grabbing the latest changes...${NC}"
+	echo -e "${YELLOW}${BLUE}dotfiles${NC}${YELLOW} directory already exists! grabbing the latest changes...${NC}"
 	cd "$HOME/dotfiles" || exit 1
 	git pull origin main
 	cd "$CWD" || exit 1
 # if it doesn't exist, clone it
 else
-	echo -e "${YELLOW_BOLD}cloning dotfiles repo into ${BLUE_BOLD}$HOME/dotfiles${NC}${YELLOW_BOLD}...${NC}"
+	echo -e "${YELLOW}cloning dotfiles repo into ${BLUE}$HOME/dotfiles${NC}${YELLOW}...${NC}"
 	git clone https://github.com/oddhorse/dotfiles.git "$HOME/dotfiles"
 fi
 
 #========[BACKUP AND SYMLINK]========
 echo
 echo -e "${PURPLE_BOLD}backing up existing configs${NC}"
-# backup and symlink .zshrc
+
+# Backup and symlink .zshrc
 ZSH_NEEDS_SYMLINK=false
 if [ -f "$HOME/.zshrc" ]; then
 	if [ -L "$HOME/.zshrc" ]; then
@@ -143,7 +144,7 @@ else
 	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}.zshrc${NC}${YELLOW_BOLD} found!${NC}"
 	ZSH_NEEDS_SYMLINK=true
 fi
-# symlink .zshrc
+
 if [ "$ZSH_NEEDS_SYMLINK" = true ]; then
 	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}.zshrc${NC}"
 	ln -s "$HOME/dotfiles/zshrc" "$HOME/.zshrc"
@@ -151,7 +152,10 @@ else
 	echo -e "${GREEN}skipping ${BLUE_BOLD}.zshrc${NC}${GREEN} symlink creation${NC}"
 fi
 
-# backup and symlink ~/.config/starship.toml
+# Create ~/.config directory if it doesn't exist
+mkdir -p "$HOME/.config"
+
+# Backup and symlink starship.toml (nerd font version - the default)
 STARSHIP_NEEDS_SYMLINK=false
 if [ -f "$HOME/.config/starship.toml" ]; then
 	if [ -L "$HOME/.config/starship.toml" ]; then
@@ -165,14 +169,39 @@ else
 	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}starship.toml${NC}${YELLOW_BOLD} found!${NC}"
 	STARSHIP_NEEDS_SYMLINK=true
 fi
-# symlink starship.toml
+
 if [ "$STARSHIP_NEEDS_SYMLINK" = true ]; then
-	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}starship.toml${NC}"
-	mkdir -p "$HOME/.config"
+	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}starship.toml${NC}${CYAN} (nerd fonts)${NC}"
 	ln -s "$HOME/dotfiles/starship.toml" "$HOME/.config/starship.toml"
 else
 	echo -e "${GREEN}skipping ${BLUE_BOLD}starship.toml${NC}${GREEN} symlink creation${NC}"
 fi
+
+# Symlink starship-text.toml (text-only version for tty)
+STARSHIP_TEXT_NEEDS_SYMLINK=false
+if [ -f "$HOME/.config/starship-text.toml" ]; then
+	if [ -L "$HOME/.config/starship-text.toml" ]; then
+		echo -e "${GREEN}existing ${BLUE_BOLD}starship-text.toml${NC}${GREEN} is already a symlink! skipping${NC}"
+	else
+		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}starship-text.toml${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.config/starship-text.toml.old${NC}"
+		mv "$HOME/.config/starship-text.toml" "$HOME/.config/starship-text.toml.old"
+		STARSHIP_TEXT_NEEDS_SYMLINK=true
+	fi
+else
+	STARSHIP_TEXT_NEEDS_SYMLINK=true
+fi
+
+if [ "$STARSHIP_TEXT_NEEDS_SYMLINK" = true ]; then
+	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}starship-text.toml${NC}${CYAN} (text-only)${NC}"
+	ln -s "$HOME/dotfiles/starship-text.toml" "$HOME/.config/starship-text.toml"
+else
+	echo -e "${GREEN}skipping ${BLUE_BOLD}starship-text.toml${NC}${GREEN} symlink creation${NC}"
+fi
+
+echo
+echo -e "${CYAN}note: ${NC}${GREEN}starship will automatically detect terminal type${NC}"
+echo -e "${GREEN}  - ${BLUE_BOLD}nerd fonts${NC}${GREEN} for terminal emulators (default config)${NC}"
+echo -e "${GREEN}  - ${BLUE_BOLD}pure text${NC}${GREEN} for linux console (auto-switched)${NC}"
 
 #========[FINISH]========
 echo

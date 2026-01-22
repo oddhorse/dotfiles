@@ -1,11 +1,22 @@
 # oddhorse's dotfiles
 
-my dotfiles #my dotfiles
+my dotfiles uwu
 
-## in herre
+## what's in here
 
-- **zshrc** - with omz plugins and stuff
-- **starship.toml** - starship prompt config
+- **zshrc** - oh-my-zsh config with lots of plugins
+- **starship.toml** - nerd font starship prompt (auto-selected for terminal emulators)
+- **starship-text.toml** - pure text prompt (auto-selected for linux console/tty)
+
+## features
+
+### auto-detects terminal capabilities! ✨
+
+the zshrc automatically detects whether you're in a terminal emulator or linux console:
+- **terminal emulators** (alacritty, kitty, iterm2, ssh sessions, etc.) → nerd font starship config
+- **linux console** (tty, /dev/tty1, bare metal console) → pure text config, no symbols
+
+no manual configuration needed! just install and it works everywhere~
 
 ## how to set up on new machine
 
@@ -49,10 +60,15 @@ mv ~/.config/starship.toml ~/.config/starship.toml.backup 2>/dev/null
 ln -s ~/dotfiles/zshrc ~/.zshrc
 mkdir -p ~/.config
 ln -s ~/dotfiles/starship.toml ~/.config/starship.toml
+ln -s ~/dotfiles/starship-text.toml ~/.config/starship-text.toml
 
 # reload shell
 source ~/.zshrc
 ```
+
+**how it works:**
+- `~/.config/starship.toml` is the default (nerd fonts) - works in terminal emulators
+- `~/.config/starship-text.toml` is auto-selected when `$TERM == "linux"` (tty)
 
 ## updating
 

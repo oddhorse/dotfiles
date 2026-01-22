@@ -106,13 +106,26 @@ plugins=(
   # Visual enhancements
   colored-man-pages         # Prettier man pages with syntax highlighting
   emoji                     # Emoji support in terminal uwu
-  starship                  # Starship prompt (handles initialization)
   
   # Safety
   safe-paste                # Prevents executing pasted commands immediately
 )
 
 source $ZSH/oh-my-zsh.sh
+
+# Starship prompt - load appropriate config based on terminal type
+# NOTE: We load starship AFTER oh-my-zsh to override the ZSH_THEME
+# The default config (~/.config/starship.toml) uses nerd fonts
+# We only override for linux console (tty) to use pure text
+if command -v starship &> /dev/null; then
+  if [[ "$TERM" == "linux" ]]; then
+    # Linux console (tty) - use text-only config
+    export STARSHIP_CONFIG="$HOME/.config/starship-text.toml"
+  fi
+  # Otherwise use default ~/.config/starship.toml (nerd fonts)
+  
+  eval "$(starship init zsh)"
+fi
 
 # User configuration
 
