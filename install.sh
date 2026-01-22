@@ -111,6 +111,18 @@ else
 	fi
 fi
 
+# check if micro is installed
+if command -v micro &>/dev/null; then
+	echo -e "${GREEN}${BLUE_BOLD}micro${NC}${GREEN} is already installed! continuing${NC}"
+else
+	echo -e "${YELLOW}${BLUE_BOLD}micro${NC}${YELLOW} not found! installing${NC}"
+	if [ "$PM" = "apt" ]; then
+		sudo apt install -y micro
+	else
+		brew install micro
+	fi
+fi
+
 #========[FETCH DOTFILE REPO]========
 echo
 echo -e "${PURPLE}fetching dotfile repo${NC}"

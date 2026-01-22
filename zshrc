@@ -34,8 +34,12 @@ if command -v brew &>/dev/null; then
 	export HOMEBREW_NO_ENV_HINTS=1
 fi
 
-# Default editor
-export EDITOR='micro'
+# Default editor (fallback to nano if micro not installed)
+if command -v micro &>/dev/null; then
+	export EDITOR='micro'
+else
+	export EDITOR='nano'
+fi
 
 # Force block cursor (override oh-my-zsh/starship defaults)
 echo -ne '\e[1 q' # blinking block cursor
