@@ -49,3 +49,40 @@ export PATH=$PATH:/sbin
 
 # Add user bin directory
 export PATH="$HOME/.local/bin:$PATH"
+
+# Topgrade auto-reminder - checks every 7 days
+if command -v topgrade &>/dev/null; then
+	_check_topgrade_reminder() {
+		local data_dir="$HOME/.local/share/dotfiles"
+		local last_run_file="$data_dir/last-topgrade"
+		local current_time=$(date +%s)
+		local seven_days=604800  # 7 days in seconds
+		
+		# Create data directory if it doesn't exist
+		mkdir -p "$data_dir"
+		
+		# If file doesn't exist, create it with current time (first run)
+		if [ ! -f "$last_run_file" ]; then
+			echo "$current_time" > "$last_run_file"
+			return
+		fi
+		
+		# Read last run timestamp
+		local last_run=$(cat "$last_run_file")
+		local elapsed=$((current_time - last_run))
+		
+		# Check if 7 days have passed
+		if [ $elapsed -ge $seven_days ]; then
+			echo -n "It's been 7 days since last topgrade run! Run it now? [Y/n]: "
+			read -r response
+			if [[ ! $response =~ ^[Nn]$ ]]; then
+				topgrade
+				# Update timestamp after run
+				echo "$(date +%s)" > "$last_run_file"
+			fi
+		fi
+	}
+	
+	# Run the check on shell load
+	_check_topgrade_reminder
+fi

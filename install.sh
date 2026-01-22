@@ -123,6 +123,21 @@ else
 	fi
 fi
 
+# check if topgrade is installed
+if command -v topgrade &>/dev/null; then
+	echo -e "${GREEN}${BLUE_BOLD}topgrade${NC}${GREEN} is already installed! continuing${NC}"
+else
+	echo -e "${YELLOW}${BLUE_BOLD}topgrade${NC}${YELLOW} not found!${NC}"
+	# topgrade is only available via brew (or manual installation methods)
+	if command -v brew &>/dev/null; then
+		echo -e "${YELLOW}installing via ${BLUE_BOLD}brew${NC}${YELLOW}...${NC}"
+		brew install topgrade
+	else
+		echo -e "${YELLOW}${BLUE_BOLD}brew${NC}${YELLOW} not available - skipping ${BLUE_BOLD}topgrade${NC}${YELLOW} installation${NC}"
+		echo -e "${CYAN}to install ${BLUE_BOLD}topgrade${NC}${CYAN} manually, see: ${BLUE}https://github.com/topgrade-rs/topgrade${NC}"
+	fi
+fi
+
 #========[FETCH DOTFILE REPO]========
 echo
 echo -e "${PURPLE}fetching dotfile repo${NC}"
