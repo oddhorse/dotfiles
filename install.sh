@@ -285,6 +285,30 @@ else
 	echo -e "${GREEN}skipping ${BLUE_BOLD}gh/config.yml${NC}${GREEN} symlink creation${NC}"
 fi
 
+# Symlink topgrade config
+echo
+echo -e "${PURPLE_BOLD}setting up topgrade config${NC}"
+TOPGRADE_NEEDS_SYMLINK=false
+if [ -f "$HOME/.config/topgrade.toml" ]; then
+	if [ -L "$HOME/.config/topgrade.toml" ]; then
+		echo -e "${GREEN}existing ${BLUE_BOLD}topgrade.toml${NC}${GREEN} is already a symlink! skipping${NC}"
+	else
+		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}topgrade.toml${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.config/topgrade.toml.old${NC}"
+		mv "$HOME/.config/topgrade.toml" "$HOME/.config/topgrade.toml.old"
+		TOPGRADE_NEEDS_SYMLINK=true
+	fi
+else
+	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}topgrade.toml${NC}${YELLOW_BOLD} found!${NC}"
+	TOPGRADE_NEEDS_SYMLINK=true
+fi
+
+if [ "$TOPGRADE_NEEDS_SYMLINK" = true ]; then
+	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}topgrade.toml${NC}"
+	ln -s "$HOME/dotfiles/topgrade.toml" "$HOME/.config/topgrade.toml"
+else
+	echo -e "${GREEN}skipping ${BLUE_BOLD}topgrade.toml${NC}${GREEN} symlink creation${NC}"
+fi
+
 #========[FINISH]========
 echo
 echo -e "${GREEN}dotfiles installed successfully${NC}"
