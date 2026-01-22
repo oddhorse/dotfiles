@@ -130,35 +130,59 @@ fi
 echo
 echo -e "${PURPLE_BOLD}backing up existing configs${NC}"
 
-# Create ~/.zshrc that sources the shared dotfile
+# Setup ~/.zshrc to source our dotfiles
 # This allows local edits and tool auto-appends without affecting git
-ZSH_NEEDS_CREATION=false
 if [ -f "$HOME/.zshrc" ]; then
 	# Check if it already sources our dotfile
 	if grep -q "source.*dotfiles/zshrc" "$HOME/.zshrc" 2>/dev/null; then
 		echo -e "${GREEN}${BLUE_BOLD}.zshrc${NC}${GREEN} already sources dotfiles/zshrc! skipping${NC}"
 	else
-		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}.zshrc${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.zshrc.old${NC}"
-		mv "$HOME/.zshrc" "$HOME/.zshrc.old"
-		ZSH_NEEDS_CREATION=true
-	fi
-else
-	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}.zshrc${NC}${YELLOW_BOLD} found!${NC}"
-	ZSH_NEEDS_CREATION=true
-fi
-
-if [ "$ZSH_NEEDS_CREATION" = true ]; then
-	echo -e "${CYAN}creating ${BLUE_BOLD}.zshrc${NC}${CYAN} that sources shared config${NC}"
-	cat >"$HOME/.zshrc" <<'EOF'
-# Load shared dotfiles config
+		echo -e "${YELLOW}existing ${BLUE_BOLD}.zshrc${NC}${YELLOW} found! merging with dotfiles setup${NC}"
+		# Create temporary file with our source line + existing content
+		cat >"$HOME/.zshrc.tmp" <<'EOF'
+# ===== DOTFILES SETUP =====
+# Load shared config from ~/dotfiles/zshrc
 source ~/dotfiles/zshrc
 
-# Machine-specific config below this line
-# (safe to edit, not tracked in git)
+# ===== EXISTING CONFIG (from previous .zshrc) =====
+# Your old .zshrc content has been preserved below:
 
 EOF
+		# Append existing .zshrc content
+		cat "$HOME/.zshrc" >>"$HOME/.zshrc.tmp"
+		# Add footer comment
+		cat >>"$HOME/.zshrc.tmp" <<'EOF'
+
+# ===== ADD NEW MACHINE-SPECIFIC CONFIG BELOW =====
+# This file is not tracked in git - safe to edit!
+# Tools (nvm, conda, etc.) can auto-append below this line.
+
+EOF
+		# Backup original
+		mv "$HOME/.zshrc" "$HOME/.zshrc.backup"
+		# Move new version in place
+		mv "$HOME/.zshrc.tmp" "$HOME/.zshrc"
+		echo -e "${GREEN}merged! original backed up to ${BLUE_BOLD}.zshrc.backup${NC}"
+	fi
 else
-	echo -e "${GREEN}skipping ${BLUE_BOLD}.zshrc${NC}${GREEN} creation${NC}"
+	echo -e "${YELLOW}no existing ${BLUE_BOLD}.zshrc${NC}${YELLOW} found! creating new one${NC}"
+	cat >"$HOME/.zshrc" <<'EOF'
+# ===== DOTFILES SETUP =====
+# Load shared config from ~/dotfiles/zshrc
+source ~/dotfiles/zshrc
+
+# ===== MACHINE-SPECIFIC CONFIG =====
+# Add your machine-specific config below (not tracked in git)
+#
+# Examples:
+#   - Homebrew: eval "$(brew shellenv)"
+#   - NVM: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+#   - Custom aliases and functions
+#
+# Tools (conda, pyenv, etc.) can auto-append below this line.
+
+EOF
+	echo -e "${GREEN}created ${BLUE_BOLD}.zshrc${NC}"
 fi
 
 # Create ~/.config directory if it doesn't exist

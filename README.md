@@ -2,6 +2,8 @@
 
 my dotfiles !!!!!! #my dotfiles
 
+**→ [Why this approach?](APPROACH.md)** - How this repo differs from popular dotfiles repos
+
 ## what's in here
 
 - **zshrc** - oh-my-zsh config with lots of plugins
@@ -77,7 +79,8 @@ source ~/.zshrc
 **how it works:**
 
 - `~/.zshrc` is a **real file** (not a symlink!) that sources `~/dotfiles/zshrc`
-- you can add machine-specific config below the source line
+- the repo's `zshrc` has universal config (oh-my-zsh, plugins, editor, etc.)
+- your actual `~/.zshrc` has machine-specific stuff (homebrew, nvm, custom aliases, etc.)
 - tools can auto-append to `~/.zshrc` without affecting your git repo
 - starship configs are symlinked to `~/.config/`
 - `~/.config/starship.toml` is the default (nerd fonts) - works in terminal emulators
@@ -85,10 +88,12 @@ source ~/.zshrc
 
 ## cross-platform support
 
-the zshrc automatically adapts to your OS:
-- **macOS**: loads `brew` and `macos` plugins, sets up homebrew
-- **Linux**: skips macOS-specific stuff
-- **both**: nvm, git, fzf, and other universal tools work everywhere
+the shared zshrc works everywhere:
+- **macOS**: loads `brew` and `macos` oh-my-zsh plugins automatically
+- **Linux**: skips macOS-specific plugins
+- **both**: git, fzf, starship, and other universal tools work everywhere
+
+machine-specific setup (homebrew paths, nvm, conda, etc.) goes in your actual `~/.zshrc` on each machine
 
 ### adding machine-specific config
 
@@ -98,12 +103,16 @@ your actual `~/.zshrc` file sources the shared dotfile, so you can add local con
 # ~/.zshrc
 source ~/dotfiles/zshrc
 
-# Your machine-specific stuff here!
-export MY_API_KEY="secret"
+# Machine-specific stuff below:
+eval "$(brew shellenv)"  # homebrew on macOS
+export NVM_DIR="$HOME/.nvm"  # nvm setup
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Custom aliases
 alias work="cd ~/work-projects"
 ```
 
-this way tools can auto-append to `~/.zshrc` without affecting your dotfiles repo~
+tools like conda, nvm, etc. can auto-append to `~/.zshrc` without affecting your dotfiles repo~
 
 ## updating
 
