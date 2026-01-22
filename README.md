@@ -1,6 +1,6 @@
 # oddhorse's dotfiles
 
-my dotfiles uwu
+my dotfiles !!!!!! #my dotfiles
 
 ## what's in here
 
@@ -10,13 +10,12 @@ my dotfiles uwu
 
 ## features
 
-### auto-detects terminal capabilities! ✨
+### auto-detects terminal capabilities
 
 the zshrc automatically detects whether you're in a terminal emulator or linux console:
+
 - **terminal emulators** (alacritty, kitty, iterm2, ssh sessions, etc.) → nerd font starship config
 - **linux console** (tty, /dev/tty1, bare metal console) → pure text config, no symbols
-
-no manual configuration needed! just install and it works everywhere~
 
 ## how to set up on new machine
 
@@ -67,12 +66,32 @@ source ~/.zshrc
 ```
 
 **how it works:**
+
 - `~/.config/starship.toml` is the default (nerd fonts) - works in terminal emulators
 - `~/.config/starship-text.toml` is auto-selected when `$TERM == "linux"` (tty)
 
+## cross-platform support
+
+the zshrc automatically adapts to your OS:
+- **macOS**: loads `brew` and `macos` plugins, sets up homebrew
+- **Linux**: skips macOS-specific stuff
+- **both**: nvm, git, fzf, and other universal tools work everywhere
+
+### machine-specific config
+
+for settings that shouldn't be in your dotfiles repo (API keys, local paths, etc.), create `~/.zshrc.local`:
+
+```bash
+# ~/.zshrc.local (not tracked in git)
+export MY_SECRET_KEY="..."
+export LOCAL_TOOL_PATH="/some/local/path"
+```
+
+this file is automatically sourced if it exists~
+
 ## updating
 
-after making changes to your dotfiles:
+after making changes to the dotfiles:
 
 ```bash
 cd ~/dotfiles
@@ -81,7 +100,7 @@ git commit -m "update configs"
 git push
 ```
 
-on other machines, just pull:
+on other machines just pull:
 
 ```bash
 cd ~/dotfiles
