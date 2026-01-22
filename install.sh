@@ -272,93 +272,108 @@ else
 	echo -e "${GREEN}skipping ${BLUE_BOLD}.gitconfig${NC}${GREEN} symlink creation${NC}"
 fi
 
-# Symlink GitHub CLI config
-echo
-echo -e "${PURPLE_BOLD}setting up GitHub CLI config${NC}"
-mkdir -p "$HOME/.config/gh"
-GHCONFIG_NEEDS_SYMLINK=false
-if [ -f "$HOME/.config/gh/config.yml" ]; then
-	if [ -L "$HOME/.config/gh/config.yml" ]; then
-		echo -e "${GREEN}existing ${BLUE_BOLD}gh/config.yml${NC}${GREEN} is already a symlink! skipping${NC}"
+# Symlink GitHub CLI config (only if gh is installed)
+if command -v gh &>/dev/null; then
+	echo
+	echo -e "${PURPLE_BOLD}setting up GitHub CLI config${NC}"
+	mkdir -p "$HOME/.config/gh"
+	GHCONFIG_NEEDS_SYMLINK=false
+	if [ -f "$HOME/.config/gh/config.yml" ]; then
+		if [ -L "$HOME/.config/gh/config.yml" ]; then
+			echo -e "${GREEN}existing ${BLUE_BOLD}gh/config.yml${NC}${GREEN} is already a symlink! skipping${NC}"
+		else
+			echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}gh/config.yml${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.config/gh/config.yml.old${NC}"
+			mv "$HOME/.config/gh/config.yml" "$HOME/.config/gh/config.yml.old"
+			GHCONFIG_NEEDS_SYMLINK=true
+		fi
 	else
-		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}gh/config.yml${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.config/gh/config.yml.old${NC}"
-		mv "$HOME/.config/gh/config.yml" "$HOME/.config/gh/config.yml.old"
+		echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}gh/config.yml${NC}${YELLOW_BOLD} found!${NC}"
 		GHCONFIG_NEEDS_SYMLINK=true
 	fi
-else
-	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}gh/config.yml${NC}${YELLOW_BOLD} found!${NC}"
-	GHCONFIG_NEEDS_SYMLINK=true
-fi
 
-if [ "$GHCONFIG_NEEDS_SYMLINK" = true ]; then
-	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}gh/config.yml${NC}"
-	ln -s "$HOME/dotfiles/gh-config.yml" "$HOME/.config/gh/config.yml"
-else
-	echo -e "${GREEN}skipping ${BLUE_BOLD}gh/config.yml${NC}${GREEN} symlink creation${NC}"
-fi
-
-# Symlink topgrade config
-echo
-echo -e "${PURPLE_BOLD}setting up topgrade config${NC}"
-TOPGRADE_NEEDS_SYMLINK=false
-if [ -f "$HOME/.config/topgrade.toml" ]; then
-	if [ -L "$HOME/.config/topgrade.toml" ]; then
-		echo -e "${GREEN}existing ${BLUE_BOLD}topgrade.toml${NC}${GREEN} is already a symlink! skipping${NC}"
+	if [ "$GHCONFIG_NEEDS_SYMLINK" = true ]; then
+		echo -e "${CYAN}creating symlink for ${BLUE_BOLD}gh/config.yml${NC}"
+		ln -s "$HOME/dotfiles/gh-config.yml" "$HOME/.config/gh/config.yml"
 	else
-		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}topgrade.toml${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.config/topgrade.toml.old${NC}"
-		mv "$HOME/.config/topgrade.toml" "$HOME/.config/topgrade.toml.old"
+		echo -e "${GREEN}skipping ${BLUE_BOLD}gh/config.yml${NC}${GREEN} symlink creation${NC}"
+	fi
+else
+	echo
+	echo -e "${YELLOW}${BLUE_BOLD}gh${NC}${YELLOW} not installed, skipping GitHub CLI config${NC}"
+fi
+
+# Symlink topgrade config (only if topgrade is installed)
+if command -v topgrade &>/dev/null; then
+	echo
+	echo -e "${PURPLE_BOLD}setting up topgrade config${NC}"
+	TOPGRADE_NEEDS_SYMLINK=false
+	if [ -f "$HOME/.config/topgrade.toml" ]; then
+		if [ -L "$HOME/.config/topgrade.toml" ]; then
+			echo -e "${GREEN}existing ${BLUE_BOLD}topgrade.toml${NC}${GREEN} is already a symlink! skipping${NC}"
+		else
+			echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}topgrade.toml${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.config/topgrade.toml.old${NC}"
+			mv "$HOME/.config/topgrade.toml" "$HOME/.config/topgrade.toml.old"
+			TOPGRADE_NEEDS_SYMLINK=true
+		fi
+	else
+		echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}topgrade.toml${NC}${YELLOW_BOLD} found!${NC}"
 		TOPGRADE_NEEDS_SYMLINK=true
 	fi
-else
-	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}topgrade.toml${NC}${YELLOW_BOLD} found!${NC}"
-	TOPGRADE_NEEDS_SYMLINK=true
-fi
 
-if [ "$TOPGRADE_NEEDS_SYMLINK" = true ]; then
-	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}topgrade.toml${NC}"
-	ln -s "$HOME/dotfiles/topgrade.toml" "$HOME/.config/topgrade.toml"
-else
-	echo -e "${GREEN}skipping ${BLUE_BOLD}topgrade.toml${NC}${GREEN} symlink creation${NC}"
-fi
-
-# Symlink ghostty config
-echo
-echo -e "${PURPLE_BOLD}setting up ghostty config${NC}"
-
-# Determine ghostty config location based on XDG_CONFIG_HOME
-if [ -n "$XDG_CONFIG_HOME" ]; then
-	GHOSTTY_CONFIG_DIR="$XDG_CONFIG_HOME/ghostty"
-else
-	GHOSTTY_CONFIG_DIR="$HOME/.config/ghostty"
-fi
-
-mkdir -p "$GHOSTTY_CONFIG_DIR"
-GHOSTTY_NEEDS_SYMLINK=false
-
-if [ -f "$GHOSTTY_CONFIG_DIR/config" ]; then
-	if [ -L "$GHOSTTY_CONFIG_DIR/config" ]; then
-		echo -e "${GREEN}existing ${BLUE_BOLD}ghostty/config${NC}${GREEN} is already a symlink! skipping${NC}"
+	if [ "$TOPGRADE_NEEDS_SYMLINK" = true ]; then
+		echo -e "${CYAN}creating symlink for ${BLUE_BOLD}topgrade.toml${NC}"
+		ln -s "$HOME/dotfiles/topgrade.toml" "$HOME/.config/topgrade.toml"
 	else
-		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}ghostty/config${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR/config.old${NC}"
-		mv "$GHOSTTY_CONFIG_DIR/config" "$GHOSTTY_CONFIG_DIR/config.old"
-		GHOSTTY_NEEDS_SYMLINK=true
+		echo -e "${GREEN}skipping ${BLUE_BOLD}topgrade.toml${NC}${GREEN} symlink creation${NC}"
 	fi
 else
-	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}ghostty/config${NC}${YELLOW_BOLD} found!${NC}"
-	GHOSTTY_NEEDS_SYMLINK=true
+	echo
+	echo -e "${YELLOW}${BLUE_BOLD}topgrade${NC}${YELLOW} not installed, skipping topgrade config${NC}"
 fi
 
-if [ "$GHOSTTY_NEEDS_SYMLINK" = true ]; then
-	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}ghostty/config${NC}${CYAN} at ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR${NC}"
-	ln -s "$HOME/dotfiles/ghostty-config" "$GHOSTTY_CONFIG_DIR/config"
-fi
+# Symlink ghostty config (only if ghostty is installed)
+if command -v ghostty &>/dev/null; then
+	echo
+	echo -e "${PURPLE_BOLD}setting up ghostty config${NC}"
 
-# Clean up old macOS-specific ghostty config location (XDG takes priority)
-MACOS_GHOSTTY="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
-if [ -f "$MACOS_GHOSTTY" ]; then
-	echo -e "${YELLOW}found old macOS-specific ghostty config! moving to trash...${NC}"
-	trash "$MACOS_GHOSTTY"
-	echo -e "${GREEN}XDG config now takes priority at ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR/config${NC}"
+	# Determine ghostty config location based on XDG_CONFIG_HOME
+	if [ -n "$XDG_CONFIG_HOME" ]; then
+		GHOSTTY_CONFIG_DIR="$XDG_CONFIG_HOME/ghostty"
+	else
+		GHOSTTY_CONFIG_DIR="$HOME/.config/ghostty"
+	fi
+
+	mkdir -p "$GHOSTTY_CONFIG_DIR"
+	GHOSTTY_NEEDS_SYMLINK=false
+
+	if [ -f "$GHOSTTY_CONFIG_DIR/config" ]; then
+		if [ -L "$GHOSTTY_CONFIG_DIR/config" ]; then
+			echo -e "${GREEN}existing ${BLUE_BOLD}ghostty/config${NC}${GREEN} is already a symlink! skipping${NC}"
+		else
+			echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}ghostty/config${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR/config.old${NC}"
+			mv "$GHOSTTY_CONFIG_DIR/config" "$GHOSTTY_CONFIG_DIR/config.old"
+			GHOSTTY_NEEDS_SYMLINK=true
+		fi
+	else
+		echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}ghostty/config${NC}${YELLOW_BOLD} found!${NC}"
+		GHOSTTY_NEEDS_SYMLINK=true
+	fi
+
+	if [ "$GHOSTTY_NEEDS_SYMLINK" = true ]; then
+		echo -e "${CYAN}creating symlink for ${BLUE_BOLD}ghostty/config${NC}${CYAN} at ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR${NC}"
+		ln -s "$HOME/dotfiles/ghostty-config" "$GHOSTTY_CONFIG_DIR/config"
+	fi
+
+	# Clean up old macOS-specific ghostty config location (XDG takes priority)
+	MACOS_GHOSTTY="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+	if [ -f "$MACOS_GHOSTTY" ]; then
+		echo -e "${YELLOW}found old macOS-specific ghostty config! moving to trash...${NC}"
+		trash "$MACOS_GHOSTTY"
+		echo -e "${GREEN}XDG config now takes priority at ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR/config${NC}"
+	fi
+else
+	echo
+	echo -e "${YELLOW}${BLUE_BOLD}ghostty${NC}${YELLOW} not installed, skipping ghostty config${NC}"
 fi
 
 #========[FINISH]========

@@ -29,3 +29,10 @@ Ideas and future improvements for this dotfiles repo.
 - Better documentation of what each config does
 - Per-machine overrides pattern (like local.zshrc)
 - Automated backup/export script
+
+### Auto-Topgrade Scheduler
+- Set up automatic topgrade runs every 7 days
+- Prompt user Y/N choice during install
+- If enabled, check on every shell load (track last run date)
+- Politely notify when it's time to update: "It's been 7 days, run topgrade? [Y/n]"
+- Store last-run timestamp in `~/.local/share/dotfiles/last-topgrade` or similar
