@@ -309,6 +309,46 @@ else
 	echo -e "${GREEN}skipping ${BLUE_BOLD}topgrade.toml${NC}${GREEN} symlink creation${NC}"
 fi
 
+# Symlink ghostty config
+echo
+echo -e "${PURPLE_BOLD}setting up ghostty config${NC}"
+
+# Determine ghostty config location based on XDG_CONFIG_HOME
+if [ -n "$XDG_CONFIG_HOME" ]; then
+	GHOSTTY_CONFIG_DIR="$XDG_CONFIG_HOME/ghostty"
+else
+	GHOSTTY_CONFIG_DIR="$HOME/.config/ghostty"
+fi
+
+mkdir -p "$GHOSTTY_CONFIG_DIR"
+GHOSTTY_NEEDS_SYMLINK=false
+
+if [ -f "$GHOSTTY_CONFIG_DIR/config" ]; then
+	if [ -L "$GHOSTTY_CONFIG_DIR/config" ]; then
+		echo -e "${GREEN}existing ${BLUE_BOLD}ghostty/config${NC}${GREEN} is already a symlink! skipping${NC}"
+	else
+		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}ghostty/config${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR/config.old${NC}"
+		mv "$GHOSTTY_CONFIG_DIR/config" "$GHOSTTY_CONFIG_DIR/config.old"
+		GHOSTTY_NEEDS_SYMLINK=true
+	fi
+else
+	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}ghostty/config${NC}${YELLOW_BOLD} found!${NC}"
+	GHOSTTY_NEEDS_SYMLINK=true
+fi
+
+if [ "$GHOSTTY_NEEDS_SYMLINK" = true ]; then
+	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}ghostty/config${NC}${CYAN} at ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR${NC}"
+	ln -s "$HOME/dotfiles/ghostty-config" "$GHOSTTY_CONFIG_DIR/config"
+fi
+
+# Clean up old macOS-specific ghostty config location (XDG takes priority)
+MACOS_GHOSTTY="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+if [ -f "$MACOS_GHOSTTY" ]; then
+	echo -e "${YELLOW}found old macOS-specific ghostty config! moving to trash...${NC}"
+	trash "$MACOS_GHOSTTY"
+	echo -e "${GREEN}XDG config now takes priority at ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR/config${NC}"
+fi
+
 #========[FINISH]========
 echo
 echo -e "${GREEN}dotfiles installed successfully${NC}"

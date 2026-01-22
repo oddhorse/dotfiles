@@ -6,9 +6,16 @@ my dotfiles !!!!!! #my dotfiles
 
 ## what's in here
 
+### Shell & Prompt
 - **zshrc** - oh-my-zsh config with lots of plugins
 - **starship.toml** - nerd font starship prompt (auto-selected for terminal emulators)
 - **starship-text.toml** - pure text prompt (auto-selected for linux console/tty)
+
+### Tool Configs
+- **gitconfig** - git user settings
+- **gh-config.yml** - GitHub CLI preferences
+- **topgrade.toml** - system update tool configuration
+- **ghostty-config** - Ghostty terminal emulator settings
 
 ## features
 
@@ -113,6 +120,21 @@ alias work="cd ~/work-projects"
 ```
 
 tools like conda, nvm, etc. can auto-append to `~/.zshrc` without affecting your dotfiles repo~
+
+## important notes
+
+### Ghostty Config & XDG_CONFIG_HOME
+
+Ghostty config is symlinked based on your `XDG_CONFIG_HOME` environment variable:
+- If `XDG_CONFIG_HOME` is set → `$XDG_CONFIG_HOME/ghostty/config`
+- If not set → `~/.config/ghostty/config` (default)
+
+**If you change `XDG_CONFIG_HOME` later**, just rerun the installer to update the symlink location:
+```bash
+cd ~/dotfiles && bash install.sh
+```
+
+The old macOS-specific config location (`~/Library/Application Support/com.mitchellh.ghostty/config`) will be moved to Trash on installation, since the XDG location takes priority.
 
 ## updating
 
