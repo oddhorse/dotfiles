@@ -130,26 +130,35 @@ fi
 echo
 echo -e "${PURPLE_BOLD}backing up existing configs${NC}"
 
-# Backup and symlink .zshrc
-ZSH_NEEDS_SYMLINK=false
+# Create ~/.zshrc that sources the shared dotfile
+# This allows local edits and tool auto-appends without affecting git
+ZSH_NEEDS_CREATION=false
 if [ -f "$HOME/.zshrc" ]; then
-	if [ -L "$HOME/.zshrc" ]; then
-		echo -e "${GREEN}existing ${BLUE_BOLD}.zshrc${NC}${GREEN} is already a symlink! skipping backup${NC}"
+	# Check if it already sources our dotfile
+	if grep -q "source.*dotfiles/zshrc" "$HOME/.zshrc" 2>/dev/null; then
+		echo -e "${GREEN}${BLUE_BOLD}.zshrc${NC}${GREEN} already sources dotfiles/zshrc! skipping${NC}"
 	else
 		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}.zshrc${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.zshrc.old${NC}"
 		mv "$HOME/.zshrc" "$HOME/.zshrc.old"
-		ZSH_NEEDS_SYMLINK=true
+		ZSH_NEEDS_CREATION=true
 	fi
 else
 	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}.zshrc${NC}${YELLOW_BOLD} found!${NC}"
-	ZSH_NEEDS_SYMLINK=true
+	ZSH_NEEDS_CREATION=true
 fi
 
-if [ "$ZSH_NEEDS_SYMLINK" = true ]; then
-	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}.zshrc${NC}"
-	ln -s "$HOME/dotfiles/zshrc" "$HOME/.zshrc"
+if [ "$ZSH_NEEDS_CREATION" = true ]; then
+	echo -e "${CYAN}creating ${BLUE_BOLD}.zshrc${NC}${CYAN} that sources shared config${NC}"
+	cat >"$HOME/.zshrc" <<'EOF'
+# Load shared dotfiles config
+source ~/dotfiles/zshrc
+
+# Machine-specific config below this line
+# (safe to edit, not tracked in git)
+
+EOF
 else
-	echo -e "${GREEN}skipping ${BLUE_BOLD}.zshrc${NC}${GREEN} symlink creation${NC}"
+	echo -e "${GREEN}skipping ${BLUE_BOLD}.zshrc${NC}${GREEN} creation${NC}"
 fi
 
 # Create ~/.config directory if it doesn't exist

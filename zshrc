@@ -128,7 +128,3 @@ if [[ "$OSTYPE" == "darwin"* ]] && [[ -d "/Applications/STMicroelectronics" ]]; 
 fi
 
 export PATH="$HOME/.local/bin:$PATH"
-
-# Machine-specific overrides (not tracked in git)
-# Create ~/.zshrc.local for machine-specific config that shouldn't be in dotfiles
-[ -f ~/.zshrc.local ] && source ~/.zshrc.local

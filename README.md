@@ -55,8 +55,17 @@ git clone https://github.com/oddhorse/dotfiles.git ~/dotfiles
 mv ~/.zshrc ~/.zshrc.backup 2>/dev/null
 mv ~/.config/starship.toml ~/.config/starship.toml.backup 2>/dev/null
 
-# create symlinks
-ln -s ~/dotfiles/zshrc ~/.zshrc
+# create .zshrc that sources the shared config
+cat > ~/.zshrc << 'EOF'
+# Load shared dotfiles config
+source ~/dotfiles/zshrc
+
+# Machine-specific config below this line
+# (safe to edit, not tracked in git)
+
+EOF
+
+# symlink starship configs
 mkdir -p ~/.config
 ln -s ~/dotfiles/starship.toml ~/.config/starship.toml
 ln -s ~/dotfiles/starship-text.toml ~/.config/starship-text.toml
@@ -67,6 +76,10 @@ source ~/.zshrc
 
 **how it works:**
 
+- `~/.zshrc` is a **real file** (not a symlink!) that sources `~/dotfiles/zshrc`
+- you can add machine-specific config below the source line
+- tools can auto-append to `~/.zshrc` without affecting your git repo
+- starship configs are symlinked to `~/.config/`
 - `~/.config/starship.toml` is the default (nerd fonts) - works in terminal emulators
 - `~/.config/starship-text.toml` is auto-selected when `$TERM == "linux"` (tty)
 
@@ -77,17 +90,20 @@ the zshrc automatically adapts to your OS:
 - **Linux**: skips macOS-specific stuff
 - **both**: nvm, git, fzf, and other universal tools work everywhere
 
-### machine-specific config
+### adding machine-specific config
 
-for settings that shouldn't be in your dotfiles repo (API keys, local paths, etc.), create `~/.zshrc.local`:
+your actual `~/.zshrc` file sources the shared dotfile, so you can add local config after the source line:
 
 ```bash
-# ~/.zshrc.local (not tracked in git)
-export MY_SECRET_KEY="..."
-export LOCAL_TOOL_PATH="/some/local/path"
+# ~/.zshrc
+source ~/dotfiles/zshrc
+
+# Your machine-specific stuff here!
+export MY_API_KEY="secret"
+alias work="cd ~/work-projects"
 ```
 
-this file is automatically sourced if it exists~
+this way tools can auto-append to `~/.zshrc` without affecting your dotfiles repo~
 
 ## updating
 
