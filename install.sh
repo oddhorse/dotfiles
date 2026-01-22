@@ -236,6 +236,30 @@ echo -e "${CYAN}note: ${NC}${GREEN}starship will automatically detect terminal t
 echo -e "${GREEN}  - ${BLUE_BOLD}nerd fonts${NC}${GREEN} for terminal emulators (default config)${NC}"
 echo -e "${GREEN}  - ${BLUE_BOLD}pure text${NC}${GREEN} for linux console (auto-switched)${NC}"
 
+# Symlink gitconfig
+echo
+echo -e "${PURPLE_BOLD}setting up git config${NC}"
+GITCONFIG_NEEDS_SYMLINK=false
+if [ -f "$HOME/.gitconfig" ]; then
+	if [ -L "$HOME/.gitconfig" ]; then
+		echo -e "${GREEN}existing ${BLUE_BOLD}.gitconfig${NC}${GREEN} is already a symlink! skipping${NC}"
+	else
+		echo -e "${YELLOW_BOLD}existing ${BLUE_BOLD}.gitconfig${NC}${YELLOW_BOLD} found! backing up to ${BLUE_BOLD}$HOME/.gitconfig.old${NC}"
+		mv "$HOME/.gitconfig" "$HOME/.gitconfig.old"
+		GITCONFIG_NEEDS_SYMLINK=true
+	fi
+else
+	echo -e "${YELLOW_BOLD}no existing ${BLUE_BOLD}.gitconfig${NC}${YELLOW_BOLD} found!${NC}"
+	GITCONFIG_NEEDS_SYMLINK=true
+fi
+
+if [ "$GITCONFIG_NEEDS_SYMLINK" = true ]; then
+	echo -e "${CYAN}creating symlink for ${BLUE_BOLD}.gitconfig${NC}"
+	ln -s "$HOME/dotfiles/gitconfig" "$HOME/.gitconfig"
+else
+	echo -e "${GREEN}skipping ${BLUE_BOLD}.gitconfig${NC}${GREEN} symlink creation${NC}"
+fi
+
 #========[FINISH]========
 echo
 echo -e "${GREEN}dotfiles installed successfully${NC}"
