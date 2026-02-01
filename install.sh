@@ -79,6 +79,24 @@ echo -e "using package manager: ${BLUE_BOLD}$PM${NC}"
 #========[INSTALL PACKAGES]========
 echo
 echo -e "${PURPLE_BOLD}installing required packages${NC}"
+
+# Install zsh first if not present
+if ! command -v zsh &>/dev/null; then
+	echo -e "${YELLOW}${BLUE_BOLD}zsh${NC}${YELLOW} not found! installing...${NC}"
+	if [ "$PM" = "apt" ]; then
+		sudo apt install -y zsh
+	else
+		brew install zsh
+	fi
+fi
+
+# Set zsh as default shell if it isn't already
+if [ "$SHELL" != "$(command -v zsh)" ]; then
+	echo -e "${YELLOW}setting ${BLUE_BOLD}zsh${NC}${YELLOW} as default shell...${NC}"
+	chsh -s "$(command -v zsh)"
+	echo -e "${CYAN}note: you'll need to ${YELLOW_BOLD}log out and back in${NC}${CYAN} for the shell change to take effect${NC}"
+fi
+
 # check if oh-my-zsh is installed
 if [ -d "$HOME/.oh-my-zsh" ]; then
 	echo -e "${GREEN}${BLUE_BOLD}oh-my-zsh${NC}${GREEN} is already installed! continuing${NC}"
@@ -91,12 +109,9 @@ fi
 if command -v starship &>/dev/null; then
 	echo -e "${GREEN}${BLUE_BOLD}starship${NC}${GREEN} is already installed! continuing${NC}"
 else
-	echo -e "${YELLOW}${BLUE_BOLD}starship${NC}${YELLOW} not found! installing${NC}"
-	if [ "$PM" = "apt" ]; then
-		sudo apt install -y starship
-	else
-		brew install starship
-	fi
+	echo -e "${YELLOW}${BLUE_BOLD}starship${NC}${YELLOW} not found! installing...${NC}"
+	# Use official installer (works on all systems, apt version too old on ubuntu <25)
+	curl -sS https://starship.rs/install.sh | sh
 fi
 
 # check if fzf is installed
@@ -173,55 +188,27 @@ echo
 echo -e "${PURPLE_BOLD}backing up existing configs${NC}"
 
 # Setup ~/.zshrc to source our dotfiles
-# This allows local edits and tool auto-appends without affecting git
+# This replaces any existing .zshrc (meant for fresh installs)
 if [ -f "$HOME/.zshrc" ]; then
 	# Check if it already sources our dotfile
 	if grep -q "source.*dotfiles/zshrc" "$HOME/.zshrc" 2>/dev/null; then
 		echo -e "${GREEN}${BLUE_BOLD}.zshrc${NC}${GREEN} already sources dotfiles/zshrc! skipping${NC}"
 	else
-		echo -e "${YELLOW}existing ${BLUE_BOLD}.zshrc${NC}${YELLOW} found! merging with dotfiles setup${NC}"
-		# Create temporary file with our source line + existing content
-		cat >"$HOME/.zshrc.tmp" <<'EOF'
-# ===== DOTFILES SETUP =====
-# Load shared config from ~/dotfiles/zshrc
-source ~/dotfiles/zshrc
-
-# ===== EXISTING CONFIG (from previous .zshrc) =====
-# Your old .zshrc content has been preserved below:
-
-EOF
-		# Append existing .zshrc content
-		cat "$HOME/.zshrc" >>"$HOME/.zshrc.tmp"
-		# Add footer comment
-		cat >>"$HOME/.zshrc.tmp" <<'EOF'
-
-# ===== ADD NEW MACHINE-SPECIFIC CONFIG BELOW =====
-# This file is not tracked in git - safe to edit!
-# Tools (nvm, conda, etc.) can auto-append below this line.
-
-EOF
-		# Backup original
+		echo -e "${YELLOW}existing ${BLUE_BOLD}.zshrc${NC}${YELLOW} found! backing up to ${BLUE_BOLD}.zshrc.backup${NC}"
 		mv "$HOME/.zshrc" "$HOME/.zshrc.backup"
-		# Move new version in place
-		mv "$HOME/.zshrc.tmp" "$HOME/.zshrc"
-		echo -e "${GREEN}merged! original backed up to ${BLUE_BOLD}.zshrc.backup${NC}"
+		echo -e "${CYAN}if you had custom config, manually copy from ${BLUE_BOLD}~/.zshrc.backup${NC}${CYAN} to new ${BLUE_BOLD}~/.zshrc${NC}"
 	fi
-else
-	echo -e "${YELLOW}no existing ${BLUE_BOLD}.zshrc${NC}${YELLOW} found! creating new one${NC}"
+fi
+
+# Create new .zshrc (or skip if already sources dotfiles)
+if [ ! -f "$HOME/.zshrc" ]; then
+	echo -e "${YELLOW}creating ${BLUE_BOLD}.zshrc${NC}"
 	cat >"$HOME/.zshrc" <<'EOF'
-# ===== DOTFILES SETUP =====
 # Load shared config from ~/dotfiles/zshrc
 source ~/dotfiles/zshrc
 
-# ===== MACHINE-SPECIFIC CONFIG =====
-# Add your machine-specific config below (not tracked in git)
-#
-# Examples:
-#   - Homebrew: eval "$(brew shellenv)"
-#   - NVM: export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-#   - Custom aliases and functions
-#
-# Tools (conda, pyenv, etc.) can auto-append below this line.
+# Add machine-specific config below (not tracked in git)
+# Tools (nvm, conda, etc.) can auto-append below this line
 
 EOF
 	echo -e "${GREEN}created ${BLUE_BOLD}.zshrc${NC}"
