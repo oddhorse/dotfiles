@@ -7,16 +7,31 @@ DISABLE_UPDATE_PROMPT="true"
 # History timestamp format
 HIST_STAMPS="mm/dd/yyyy"
 
-# Plugins (universal - work across all machines)
-plugins=(git npm node nvm python z wd vscode fzf command-not-found alias-finder history-substring-search extract copyfile copypath colored-man-pages emoji safe-paste)
+# Base plugins (useful everywhere)
+plugins=(git z wd fzf command-not-found history-substring-search extract colored-man-pages safe-paste)
 
-# macOS-specific plugins (added conditionally)
+# Dev tools (only if installed)
+command -v npm &>/dev/null && plugins+=(npm node nvm)
+command -v python &>/dev/null && plugins+=(python)
+
+# Desktop-only plugins (GUI environment detection)
+if [[ -n "$DISPLAY" ]] || [[ -n "$WAYLAND_DISPLAY" ]] || [[ "$OSTYPE" == "darwin"* ]]; then
+	command -v code &>/dev/null && plugins+=(vscode)
+	plugins+=(copyfile copypath emoji)
+fi
+
+# macOS-specific plugins
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	plugins+=(brew macos)
 fi
 
+zstyle ':omz:plugins:nvm' autoload yes
+
 # Load oh-my-zsh
 source $ZSH/oh-my-zsh.sh
+
+# Disable history expansion (!! in strings causes issues)
+setopt NO_BANG_HIST
 
 # Starship prompt with terminal detection
 if command -v starship &>/dev/null; then
@@ -41,8 +56,10 @@ else
 	export EDITOR='nano'
 fi
 
-# Force block cursor (override oh-my-zsh/starship defaults)
-echo -ne '\e[1 q' # blinking block cursor
+# Force block cursor (interactive shells only)
+if [[ $- == *i* ]]; then
+	echo -ne '\e[1 q' # blinking block cursor
+fi
 
 # Add /sbin to PATH (some systems need this)
 export PATH=$PATH:/sbin
@@ -50,8 +67,8 @@ export PATH=$PATH:/sbin
 # Add user bin directory
 export PATH="$HOME/.local/bin:$PATH"
 
-# Topgrade auto-reminder - checks every 7 days
-if command -v topgrade &>/dev/null; then
+# Topgrade auto-reminder - checks every 7 days (interactive shells only)
+if command -v topgrade &>/dev/null && [[ $- == *i* ]]; then
 	_check_topgrade_reminder() {
 		local data_dir="$HOME/.local/share/dotfiles"
 		local last_run_file="$data_dir/last-topgrade"

@@ -128,12 +128,27 @@ if command -v topgrade &>/dev/null; then
 	echo -e "${GREEN}${BLUE_BOLD}topgrade${NC}${GREEN} is already installed! continuing${NC}"
 else
 	echo -e "${YELLOW}${BLUE_BOLD}topgrade${NC}${YELLOW} not found!${NC}"
-	# topgrade is only available via brew (or manual installation methods)
+	# Try brew first (works on both macOS and Linux if brew is installed)
 	if command -v brew &>/dev/null; then
 		echo -e "${YELLOW}installing via ${BLUE_BOLD}brew${NC}${YELLOW}...${NC}"
 		brew install topgrade
+	# On Linux without brew, install from GitHub releases
+	elif [[ "$OS" == "Linux" ]] && command -v curl &>/dev/null; then
+		echo -e "${YELLOW}installing via ${BLUE_BOLD}GitHub releases${NC}${YELLOW}...${NC}"
+		# Create ~/.local/bin if it doesn't exist (already in PATH via zshrc)
+		mkdir -p "$HOME/.local/bin"
+		# Get latest version and download
+		TOPGRADE_VERSION=$(curl -s https://api.github.com/repos/topgrade-rs/topgrade/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+		echo -e "${CYAN}downloading topgrade v${TOPGRADE_VERSION}...${NC}"
+		curl -Lo /tmp/topgrade.tar.gz "https://github.com/topgrade-rs/topgrade/releases/download/v${TOPGRADE_VERSION}/topgrade-v${TOPGRADE_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+		# Extract and install
+		tar -xzf /tmp/topgrade.tar.gz -C /tmp
+		mv /tmp/topgrade "$HOME/.local/bin/"
+		chmod +x "$HOME/.local/bin/topgrade"
+		rm /tmp/topgrade.tar.gz
+		echo -e "${GREEN}topgrade installed to ${BLUE_BOLD}~/.local/bin/topgrade${NC}"
 	else
-		echo -e "${YELLOW}${BLUE_BOLD}brew${NC}${YELLOW} not available - skipping ${BLUE_BOLD}topgrade${NC}${YELLOW} installation${NC}"
+		echo -e "${YELLOW}no ${BLUE_BOLD}brew${NC}${YELLOW} or ${BLUE_BOLD}curl${NC}${YELLOW} available - skipping ${BLUE_BOLD}topgrade${NC}${YELLOW} installation${NC}"
 		echo -e "${CYAN}to install ${BLUE_BOLD}topgrade${NC}${CYAN} manually, see: ${BLUE}https://github.com/topgrade-rs/topgrade${NC}"
 	fi
 fi
@@ -380,11 +395,14 @@ if command -v ghostty &>/dev/null; then
 	fi
 
 	# Clean up old macOS-specific ghostty config location (XDG takes priority)
-	MACOS_GHOSTTY="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
-	if [ -f "$MACOS_GHOSTTY" ]; then
-		echo -e "${YELLOW}found old macOS-specific ghostty config! moving to trash...${NC}"
-		trash "$MACOS_GHOSTTY"
-		echo -e "${GREEN}XDG config now takes priority at ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR/config${NC}"
+	# Only check on macOS where this path exists
+	if [[ "$OS" == "macOS" ]]; then
+		MACOS_GHOSTTY="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+		if [ -f "$MACOS_GHOSTTY" ]; then
+			echo -e "${YELLOW}found old macOS-specific ghostty config! moving to trash...${NC}"
+			trash "$MACOS_GHOSTTY"
+			echo -e "${GREEN}XDG config now takes priority at ${BLUE_BOLD}$GHOSTTY_CONFIG_DIR/config${NC}"
+		fi
 	fi
 else
 	echo
