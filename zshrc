@@ -91,7 +91,7 @@ if command -v topgrade &>/dev/null && [[ $- == *i* ]]; then
 		# Check if 7 days have passed
 		if [ $elapsed -ge $seven_days ]; then
 			echo -n "It's been 7 days since last topgrade run! Run it now? [Y/n]: "
-			read -n 1 -r response
+			read -k 1 -r response
 			echo  # newline after single char input
 			if [[ ! $response =~ ^[Nn]$ ]]; then
 				topgrade
