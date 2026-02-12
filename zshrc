@@ -67,6 +67,9 @@ export PATH=$PATH:/sbin
 # Add user bin directory
 export PATH="$HOME/.local/bin:$PATH"
 
+# Rust cargo binaries (if installed)
+[ -d "$HOME/.cargo/bin" ] && export PATH="$HOME/.cargo/bin:$PATH"
+
 # Topgrade auto-reminder - checks every 7 days (interactive shells only)
 if command -v topgrade &>/dev/null && [[ $- == *i* ]]; then
 	_check_topgrade_reminder() {
